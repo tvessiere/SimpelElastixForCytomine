@@ -22,7 +22,7 @@ if __name__ == "__main__":
     )
 
     software = conn.add_software("SE_TranslationAffine", "ImageAlignment")
-    conn.add_software_parameter(name="cytomine_id_software",id_software=software.id,type = "Number",required=True,)
+    conn.add_software_parameter(name="cytomine_id_software",id_software=software.id,type = "Number",required=True,index=1,set_by_server=True)
 
     addSoftwareProject = conn.add_software_project(id_project, software.id)
 
