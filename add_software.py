@@ -21,8 +21,14 @@ if __name__ == "__main__":
         verbose=True
     )
 
-    software = conn.add_software("SE_TranslationAffine", "ImageAlignment")
-    conn.add_software_parameter(name="cytomine_id_software",id_software=software.id,type = "Number",required=True,index=1,set_by_server=True)
+    software = conn.get_software(19953189)
+    conn.add_software_parameter(name="cytomine_id_software",id_software=software.id,type = "Number",default_value=None,required=True,index=1,set_by_server=True)
+    conn.add_software_parameter(name="cytomine_id_project",id_software=software.id,type= "Number",default_value=None,required=True,index=10,set_by_server=True)
+    conn.add_software_parameter(name="cytomine_id_fix_image",id_software=software.id,type= "Number",default_value=None,required=True,index=20,set_by_server=False)
+    conn.add_software_parameter(name="cytomine_id_mov_image",id_software=software.id,type= "Number",default_value=None,required=True,index=30,set_by_server=False)
+    conn.add_software_parameter(name="cytomine_nbiterations",id_software=software.id,type= "Number",default_value=None,required=True,index=40,set_by_server=False)
+    conn.add_software_parameter(name="cytomine_nbspatialsampels",id_software=software.id,type= "Number",default_value=None,required=True,index=50,set_by_server=False)
 
     addSoftwareProject = conn.add_software_project(id_project, software.id)
+
 
