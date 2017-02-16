@@ -8,7 +8,7 @@ if __name__ == "__main__":
 
     cytomine_host = "demo.cytomine.be"
     Pk = 'cbfe0e04-3fd7-4a7f-a13c-b86685ecb570'
-    Prk = 'XXXXXX'
+    Prk = 'XXXX'
     id_project = 19941904
 
     # Connection to Cytomine Core
@@ -28,7 +28,6 @@ if __name__ == "__main__":
     conn.add_software_parameter(name="cytomine_id_mov_image",id_software=software.id,type= "Number",default_value=None,required=True,index=30,set_by_server=False)
     conn.add_software_parameter(name="cytomine_nbiterations",id_software=software.id,type= "Number",default_value=None,required=True,index=40,set_by_server=False)
     conn.add_software_parameter(name="cytomine_nbspatialsampels",id_software=software.id,type= "Number",default_value=None,required=True,index=50,set_by_server=False)
-
     addSoftwareProject = conn.add_software_project(id_project, software.id)
 
 
