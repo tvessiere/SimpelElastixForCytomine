@@ -19,11 +19,11 @@ SimpleElastix.SetMovingImage(MovingImage)
 
 parameterMapTranslation = sitk.GetDefaultParameterMap("translation")
 parameterMapAffine = sitk.GetDefaultParameterMap("affine")
-parameterMapSpline = sitk.GetDefaultParameterMap("bspline")
+#parameterMapSpline = sitk.GetDefaultParameterMap("bspline")
 
 SimpleElastix.SetParameterMap(parameterMapTranslation)
 SimpleElastix.AddParameterMap(parameterMapAffine)
-SimpleElastix.AddParameterMap(parameterMapSpline)
+#SimpleElastix.AddParameterMap(parameterMapSpline)
 
 SimpleElastix.SetParameter("MaximumNumberOfIterations" , str(iterationNumbers))
 SimpleElastix.SetParameter("MaximumNumberOfSamplingAttempts" , str(samplingAttemps))
