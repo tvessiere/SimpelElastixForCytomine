@@ -32,7 +32,9 @@ SimpleElastix.SetParameter("WriteIterationInfo" , "true")
 
 SimpleElastix.PrintParameterMap()
 
+print "Before Exe"
 SimpleElastix.Execute()
+print "After Exe"
 
 img = SimpleElastix.GetResultImage()
 np_img = sitk.GetArrayFromImage(img)
