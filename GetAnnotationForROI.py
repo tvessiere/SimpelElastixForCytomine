@@ -7,7 +7,7 @@ from shapely.affinity import affine_transform
 if __name__ == "__main__":
 
     Pk = 'cbfe0e04-3fd7-4a7f-a13c-b86685ecb570'
-    Prk = '1e1cb3e8-ed0a-434d-b049-3a48552429c7'
+    Prk = 'XXXXXX'
     Url = 'demo.cytomine.be'
 
     cytomine_server = Cytomine(Url,Pk,Prk)
