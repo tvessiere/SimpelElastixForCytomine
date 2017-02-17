@@ -4,7 +4,7 @@ from cytomine.models import *
 if __name__ == "__main__":
 
     Pk = 'cbfe0e04-3fd7-4a7f-a13c-b86685ecb570'
-    Prk = 'XXXXXXX'
+    Prk = 'XXXXXXXXXX'
     Url = 'demo.cytomine.be'
     output_dir = "/home/tvessiere/data/Project/getannotationstissu"
 

@@ -3,15 +3,17 @@ import numpy as np
 import scipy.misc as misc
 
 simpleElastix = sitk.SimpleElastix()
-simpleElastix.SetParameter( "Metric", "CorrespondingPointsEuclideanDistanceMetric" )
-simpleElastix.SetParameter("Registration","AdvancedImageToImageMetric" )
+simpleElastix.SetParameter("Registration","MultiMetricMultiResolutionRegistration")
+simpleElastix.SetParameter( "Metric", ("NormalizedMutualInformation", "CorrespondingPointsEuclideanDistanceMetric",))
+simpleElastix.SetParameter("Metric0Weight", "0.0")
 simpleElastix.LogToConsoleOn()
-#simpleElastix.SetParameterMap(sitk.GetDefaultParameterMap('rigid'))
-#simpleElastix.AddParameterMap(sitk.GetDefaultParameterMap('affine'))
+simpleElastix.SetParameterMap(sitk.GetDefaultParameterMap('translation'))
+simpleElastix.AddParameterMap(sitk.GetDefaultParameterMap('affine'))
+simpleElastix.SetParameter("MaximumNumberOfIterations" , "2048")
 simpleElastix.PrintParameterMap()
 
-fixImage = sitk.ReadImage("/home/tvessiere/Pictures/fixtissu.png",sitk.sitkFloat32)
-movingImage = sitk.ReadImage("/home/tvessiere/Pictures/movtissu.png",sitk.sitkFloat32)
+fixImage = sitk.ReadImage("/home/tvessiere/Pictures/fixtissu2.png",sitk.sitkFloat32)
+movingImage = sitk.ReadImage("/home/tvessiere/Pictures/movtissu2.png",sitk.sitkFloat32)
 
 simpleElastix.SetFixedImage(fixImage)
 simpleElastix.SetMovingImage(movingImage)
