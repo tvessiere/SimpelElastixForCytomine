@@ -6,7 +6,7 @@ import numpy as np
 import os
 
 Pk = 'cbfe0e04-3fd7-4a7f-a13c-b86685ecb570'
-Prk = 'XXXXXX'
+Prk = 'XXXXX'
 Url = 'demo.cytomine.be'
 
 
