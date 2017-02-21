@@ -4,19 +4,20 @@ from cytomine import Cytomine
 import scipy.misc as misc
 import numpy as np
 import os
+import urllib2
 
 Pk = 'cbfe0e04-3fd7-4a7f-a13c-b86685ecb570'
 Prk = 'XXXXX'
-Url = 'demo.cytomine.be'
-
-
+urlCore = 'demo.cytomine.be'
+protocol = 'http://'
+urlIms = "demo-ims.cytomine.be"
 workingPath = "/home/tvessiere/data/Project/TestProcessing"
 
 
 
 def main(argv):
 
-    #parsing arguemnts
+    #parsing arguments
     parser = ArgumentParser(prog="TestParser", description="Catch argment form exec cmd")
 
     parser.add_argument('--cytomine_host', dest="cytomine_host", default='demo.cytomine.be')
@@ -33,14 +34,15 @@ def main(argv):
     #set var
     fixImageId = arguments.id_fix_image
     movImageId = arguments.id_mov_image
-    idProject = arguments.cytomine_id_project
+    projectId = arguments.cytomine_id_project
+
 
 
     #connection
-    conn = Cytomine(Url,Pk,Prk,working_path=workingPath)
+    conn = Cytomine(urlCore,Pk,Prk,working_path=workingPath)
 
     #dump images in folder working path + images, for reach iamges : working path + images + id project -> u are in the right folder
-    conn.dump_project_images(id_project=idProject,dest_path="/images/",override=True,max_size=True)
+    conn.dump_project_images(id_project=19941904,dest_path="/images/",override=True,max_size=True)
 
     """fixImage = sitk.ReadImage(workingPath + "/images/" + str(idProject) + "/" + str(fixImageId)+ ".jpg",sitk.sitkFloat32)
     movImage = sitk.ReadImage(workingPath + "/images/" + str(idProject) + "/" + str(movImageId) +".jpg",sitk.sitkFloat32)
@@ -67,9 +69,17 @@ def main(argv):
     misc.imsave("/home/tvessiere/data/Project/TestProcessing/images/result_translationaffine.png", img_to_save)
     misc.imsave("/home/tvessiere/data/Project/TestProcessing/images/movimage.png",np_img)"""
 
-    storageObj = conn.get_storage(19676833)
-    ims_conn = Cytomine("demo-ims.cytomine.be", Pk, Prk, verbose=False)
-    response = ims_conn.upload_image(filename="/home/tvessiere/data/Project/TestProcessing/images/result_translationaffine.png",project=idProject,storage=storageObj,cytomine_host="demo.cytomine.be",sync=False,properties=None)
+    storageId = 19676833
+    ims_conn = Cytomine(urlIms, Pk, Prk, verbose=False)
+    sync = False
+
+    #try:
+    storage = conn.get_storage(storageId)
+    assert storage.id == storageId
+    reponse = ims_conn.upload_image("/home/tvessiere/data/Project/TestProcessing/images/result_translationaffine.png",projectId,storageId,"http://"+urlCore)
+    #assert response.get('status') == 200  # uploaded worked as expected
+    #except urllib2.HTTPError as Error:
+        #print("error :" + Error.reason)
     #conn.upload_image("/home/tvessiere/data/Project/TestProcessing/images/result_translationaffine.png",project=idProject,storage=storage,cytomine_host="demo-ims.cytomine.be")
     #conn.upload_image("/home/tvessiere/data/Project/TestProcessing/images/movimage.png", idProject, 19676833, conn,"demo-ims.cytomine.be")
 
