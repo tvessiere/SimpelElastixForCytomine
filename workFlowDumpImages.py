@@ -10,12 +10,13 @@ Pk = 'cbfe0e04-3fd7-4a7f-a13c-b86685ecb570'
 Prk = 'XXXXX'
 urlCore = 'demo.cytomine.be'
 protocol = 'http://'
-urlIms = "demo-ims.cytomine.be"
+urlUpload = "demo-upload.cytomine.be"
 workingPath = "/home/tvessiere/data/Project/TestProcessing"
 
 
 def main(argv):
     # parsing arguments
+    os.system("rm -rf /home/tvessiere/data/Project/TestProcessing/images/")
     parser = ArgumentParser(prog="TestParser", description="Catch arguments form exec cmd")
 
     parser.add_argument('--cytomine_host', dest="cytomine_host", default='demo.cytomine.be')
@@ -38,10 +39,10 @@ def main(argv):
     conn = Cytomine(urlCore, Pk, Prk, working_path=workingPath)
 
     # dump images in folder working path + images, for reach iamges : working path + images + id project -> u are in the right folder
-    conn.dump_project_images(id_project=19941904, dest_path="/images/", override=True, max_size=True)
+    conn.dump_project_images(id_project=projectId, dest_path="/images/", override=True, max_size=True)
 
-    """fixImage = sitk.ReadImage(workingPath + "/images/" + str(idProject) + "/" + str(fixImageId)+ ".jpg",sitk.sitkFloat32)
-    movImage = sitk.ReadImage(workingPath + "/images/" + str(idProject) + "/" + str(movImageId) +".jpg",sitk.sitkFloat32)
+    fixImage = sitk.ReadImage(workingPath + "/images/" + str(projectId) + "/" + str(fixImageId)+ ".jpg",sitk.sitkFloat32)
+    movImage = sitk.ReadImage(workingPath + "/images/" + str(projectId) + "/" + str(movImageId) +".jpg",sitk.sitkFloat32)
 
     simpleElastix = sitk.SimpleElastix()
     simpleElastix.SetFixedImage(fixImage)
@@ -63,21 +64,20 @@ def main(argv):
     img_to_save[:, :, 1] = np_img
     img_to_save[:, :, 2] = sitk.GetArrayFromImage(fixImage)
     misc.imsave("/home/tvessiere/data/Project/TestProcessing/images/result_translationaffine.png", img_to_save)
-    misc.imsave("/home/tvessiere/data/Project/TestProcessing/images/movimage.png",np_img)"""
+    misc.imsave("/home/tvessiere/data/Project/TestProcessing/images/movimage.png",np_img)
 
     storageId = 19676833
-    ims_conn = Cytomine(urlIms, Pk, Prk, verbose=False)
+    uploadConn = Cytomine(urlUpload, Pk, Prk, verbose=False)
     sync = False
 
     storage = conn.get_storage(storageId)
     assert storage.id == storageId
 
-    response = ims_conn.upload_image("/home/tvessiere/data/Project/TestProcessing/images/result_translationaffine.png",
-                                     projectId, storageId, "http://" + urlCore)
+    uploadConn.upload_image("/home/tvessiere/data/Project/TestProcessing/images/result_translationaffine.png",projectId,storageId,"http://"+urlCore)
     # conn.upload_image("/home/tvessiere/data/Project/TestProcessing/images/movimage.png", idProject, 19676833, conn,"demo-ims.cytomine.be")
 
     # os.remove("/home/tvessiere/data/Project/TestProcessing/images/")
-
+    os.system("rm -rf /home/tvessiere/data/Project/TestProcessing/images/")
     # /home/tvessiere/data/miniconda2/envs/cytomine/bin/python FirstWorkFlow.py --cytomine_host demo.cytomine.be --cytomine_public_key --cytomine_id_project 19941904  --id_fix_image 19942095 --id_mov_image 19942069 --nb_iterations 6000 --nb_spatialsampels 6000
 
 
