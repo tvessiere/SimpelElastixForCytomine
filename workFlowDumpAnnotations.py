@@ -1,3 +1,7 @@
+__author__ = "Vessiere Thomas <vessiere.thomas@hotmail.com"
+__Copyright__ = "Copyright 2010-2017 University of Liège, Belgium, http://www.cytomine.be/"
+
+
 from argparse import ArgumentParser
 import SimpleITK as sitk
 from cytomine import Cytomine
@@ -5,7 +9,6 @@ from cytomine.models import *
 import scipy.misc as misc
 import numpy as np
 import os
-import urllib2
 
 Pk = 'cbfe0e04-3fd7-4a7f-a13c-b86685ecb570'
 Prk = 'XXX'
@@ -118,7 +121,8 @@ def main(argv):
 
     os.system("rm -rf " + workingPath + "imagefix" + "/" + str(IdTerm) + "/")
     os.system("rm -rf " + workingPath + "imagemov" + "/" + str(IdTerm) + "/")
-    # /home/tvessiere/data/miniconda2/envs/cytomine/bin/python FirstWorkFlow.py --cytomine_host demo.cytomine.be --cytomine_public_key --cytomine_id_project 19941904  --id_fix_image 19942095 --id_mov_image 19942069 --nb_iterations 6000 --nb_spatialsampels 6000
+
+    # /home/tvessiere/data/miniconda2/envs/cytomine/bin/python FirstWorkFlow.py --cytomine_host demo.cytomine.be --cytomine_id_project 19941904  --id_fix_image 19942095 --id_mov_image 19942069 --nb_iterations 6000 --nb_spatialsampels 6000
 
 
 if __name__ == "__main__":
