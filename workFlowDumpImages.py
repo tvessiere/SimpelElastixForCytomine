@@ -1,10 +1,13 @@
+__author__ = "Vessiere Thomas <vessiere.thomas@hotmail.com"
+__Copyright__ = "Copyright 2010-2017 University of Liège, Belgium, http://www.cytomine.be/"
+
 from argparse import ArgumentParser
 import SimpleITK as sitk
 from cytomine import Cytomine
 import scipy.misc as misc
 import numpy as np
 import os
-import urllib2
+
 
 Pk = 'cbfe0e04-3fd7-4a7f-a13c-b86685ecb570'
 Prk = 'XXXXX'
