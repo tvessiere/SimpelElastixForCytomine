@@ -116,8 +116,8 @@ def main(argv):
 
     demoUpload.upload_image("/home/tvessiere/data/Project/TestProcessing/images/result_translationaffine.png",projectId, storageId, "http://demo.cytomine.be")
 
-    #os.remove("/home/tvessiere/data/Project/TestProcessing/images/")
-
+    os.system("rm -rf " + workingPath + "imagefix" + "/" + str(IdTerm) + "/")
+    os.system("rm -rf " + workingPath + "imagemov" + "/" + str(IdTerm) + "/")
     # /home/tvessiere/data/miniconda2/envs/cytomine/bin/python FirstWorkFlow.py --cytomine_host demo.cytomine.be --cytomine_public_key --cytomine_id_project 19941904  --id_fix_image 19942095 --id_mov_image 19942069 --nb_iterations 6000 --nb_spatialsampels 6000
 
 
