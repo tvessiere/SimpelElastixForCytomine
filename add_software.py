@@ -1,3 +1,7 @@
+__author__ = "Vessiere Thomas <vessiere.thomas@hotmail.com"
+__Copyright__ = "Copyright 2010-2017 University of Liège, Belgium, http://www.cytomine.be/"
+
+
 import os
 import tempfile
 
