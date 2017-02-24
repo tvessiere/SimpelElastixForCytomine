@@ -17,7 +17,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
     # set parameters for your algo, 4 first params must be like this #
     def __init__(self, cytomine, software_id, project_id, job_parameters,
                  fix_image_id, moving_image_id, nb_spatial_sample, nb_iterations, storage_id,
-                 id_annotation_fix, id_annotation_moving, working_path, cytomine_host, cytomine_upload, pk, prk):
+                 id_annotation_fix, id_annotation_moving, working_path, cytomine_host, cytomine_upload, pk, prk,exort_overlay_images):
 
         # call init from parent classes #
         CytomineJob.__init__(self, cytomine, software_id, project_id, """parameters=job_parameters""" )
@@ -38,6 +38,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
         self._project_id = project_id
         self._pk = pk
         self._prk = prk
+        self._overlayed_images = exort_overlay_images
 
     # run methode, the logic of your algorithm is here #
     # DONT FORGET TO COMPLETE PATH WITH ID_JOB #
@@ -99,13 +100,26 @@ class SimpleElastixJob(CytomineJob, Loggable):
 
 
         # load images #
-        fix_image = sitk.ReadImage(path_to_fix_image, sitk.sitkFloat32)
-        moving_image = sitk.ReadImage(path_to_moving_image, sitk.sitkFloat32)
+        fix_image_grey = misc.imread(path_to_fix_image, mode='F')
+        fix_image_color = misc.imread(path_to_fix_image, mode='RGB')
+
+        moving_image_grey = misc.imread(path_to_moving_image, mode='F')
+        moving_image_color = misc.imread(path_to_moving_image, mode='RGB')
+
+        # get images with ITK format #
+        itk_fix_image = sitk.GetImageFromArray(fix_image_grey)
+        itk_moving_image = sitk.GetImageFromArray(moving_image_grey)
 
         # start processing algorithm #
+        # got all the channel for keep orignal color #
+        itk_mov_image_color_0 = sitk.GetImageFromArray(moving_image_color[:, :, 0])
+        itk_mov_image_color_1 = sitk.GetImageFromArray(moving_image_color[:, :, 1])
+        itk_mov_image_color_2 = sitk.GetImageFromArray(moving_image_color[:, :, 2])
+
+        # set ParamtersMap to sitk for computed transformation #
         simple_elastix = sitk.SimpleElastix()
-        simple_elastix.SetFixedImage(fix_image)
-        simple_elastix.SetMovingImage(moving_image)
+        simple_elastix.SetFixedImage(itk_fix_image)
+        simple_elastix.SetMovingImage(itk_moving_image)
         parameterMapTranslation = sitk.GetDefaultParameterMap("translation")
         parameterMapAffine = sitk.GetDefaultParameterMap("affine")
 
@@ -120,19 +134,53 @@ class SimpleElastixJob(CytomineJob, Loggable):
         # start computing #
         simple_elastix.Execute()
 
-        # format image result #
-        img = simple_elastix.GetResultImage()
-        np_img = sitk.GetArrayFromImage(img)
-        img_to_save = np.zeros((np_img.shape[0], np_img.shape[1], 3))
-        img_to_save[:, :, 1] = np_img
-        img_to_save[:, :, 2] = sitk.GetArrayFromImage(fix_image)
-        img_to_save_path = os.path.join(self._working_path,"images",str(self._storage_id),"result_translationaffine.png")
-        misc.imsave(img_to_save_path, img_to_save)
+        # get parameters of the transform for apply it on 3 channels #
+        transform_map = simple_elastix.GetTransformParameterMap()
 
-        # connection to demo-upload #
-        demo_upload = Cytomine(self._cytomine_upload, self._pk, self._prk, verbose=True)
+        # for set shape of images #
+        np_img = sitk.GetArrayFromImage(simple_elastix.GetResultImage())
 
-        demo_upload.upload_image(img_to_save_path,self._project_id, self._storage_id, "http://demo.cytomine.be")
+        # apply transforms #
+        TransformX = sitk.SimpleTransformix()
+        TransformX.SetTransformParameterMap(transform_map)
+        TransformX.SetMovingImage(itk_mov_image_color_0)
+        img_to_save_0 = TransformX.Execute()
+        TransformX.SetMovingImage(itk_mov_image_color_1)
+        img_to_save_1 = TransformX.Execute()
+        TransformX.SetMovingImage(itk_mov_image_color_2)
+        img_to_save_2 = TransformX.Execute()
+
+        # format image color #
+        img_color_final = np.zeros((np_img.shape[0], np_img.shape[1], 3))
+
+        img_color_final[:, :, 0] = sitk.GetArrayFromImage(img_to_save_0)
+        img_color_final[:, :, 1] = sitk.GetArrayFromImage(img_to_save_1)
+        img_color_final[:, :, 2] = sitk.GetArrayFromImage(img_to_save_2)
+
+        # save images #
+        # DONT FORGET TO FORMAT THE MAP FOR IMAGE'S PROPERTIES #
+        img_transform_to_save_path = os.path.join(self._working_path, "images", str(self.job.id),"result_translationaffine.png")
+        properties_map = { 'transform_param' : ('h1','h2') }
+
+        if(self._overlayed_images == True):
+            img_overlay_to_save_path = os.path.join(self._working_path, "images", str(self.job.id),"overlayed_images.png")
+            misc.imsave(img_transform_to_save_path,img_color_final)
+            misc.imsave(img_overlay_to_save_path, img_color_final + (0.75 * fix_image_color))
+
+            # connection to demo-upload #
+            demo_upload = Cytomine(self._cytomine_upload, self._pk, self._prk, verbose=True)
+            demo_upload.upload_image(img_transform_to_save_path, self._project_id, self._storage_id, "http://demo.cytomine.be",properties=properties_map)
+            # DONT FORGET TO COMPLETE PROPERTIES #
+            demo_upload.upload_image(img_overlay_to_save_path,self._project_id, self._storage_id, "http://demo.cytomine.be",properties=None)
+
+        else:
+            misc.imsave(img_transform_to_save_path, img_color_final)
+            misc.imsave(img_transform_to_save_path,img_color_final)
+
+            # connection to demo-upload #
+            demo_upload = Cytomine(self._cytomine_upload, self._pk, self._prk, verbose=True)
+            # DONT FORGET TO COMPLETE PROPERTIES #
+            demo_upload.upload_image(img_transform_to_save_path, self._project_id, self._storage_id,  "http://demo.cytomine.be", properties=properties_map)
 
 def main(argv):
 
@@ -153,6 +201,7 @@ def main(argv):
     parser.add_argument("--cytomine_id_annotation_moving", dest="id_annotation_moving", type=long)
     parser.add_argument("--cytomine_working_path",dest="working_path")
     parser.add_argument("--cytomine_upload",dest ="cytomine_upload")
+    parser.add_argument("--export_overlay_images",dest="export_overlay_images")
 
     arguments, others = parser.parse_known_args(argv)
 
@@ -171,7 +220,7 @@ def main(argv):
                     cytomine, arguments.cytomine_id_software, arguments.cytomine_id_project, arguments.__dict__,
                     arguments.id_fix_image, arguments.id_mov_image, arguments.nb_iterations, arguments.nb_spatialsampels,
                     arguments.storage_id, arguments.id_annotation_fix, arguments.id_annotation_moving, arguments.working_path,
-                    arguments.cytomine_upload,arguments.cytomine_public_key, arguments.cytomine_private_key
+                    arguments.cytomine_upload,arguments.cytomine_public_key, arguments.cytomine_private_key,arguments.export_overlay_images
                  ) as context:
 
         context.run()
