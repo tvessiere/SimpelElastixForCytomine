@@ -56,9 +56,8 @@ SimpleElastix.SetParameter("MaximumNumberOfSamplingAttempts" , str(samplingAttem
 SimpleElastix.SetParameter("NumberOfSpatialSamples" , str(spatialSamples))
 SimpleElastix.SetParameter("WriteIterationInfo" , "true")
 
-print "Before Exe"
 SimpleElastix.Execute()
-print "After Exe"
+
 
 map = SimpleElastix.GetTransformParameterMap()
 
