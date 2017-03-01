@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     cytomine_host = "demo.cytomine.be"
     Pk = 'cbfe0e04-3fd7-4a7f-a13c-b86685ecb570'
-    Prk = 'XXXXXXXXXX'
+    Prk = 'XXXXXX'
     id_project = 19941904
 
     # Connection to Cytomine Core
@@ -26,12 +26,12 @@ if __name__ == "__main__":
     )
 
     #add software with execute command
-    software = conn.add_software("SE_TranslationAffine6","createRabbitJobWithArgsService","download","python algo/Simple_Elastix/WorkFlowSE.py"+
+    software = conn.add_software("SE_TranslationAffine7","createRabbitJobWithArgsService","download","python algo/Simple_Elastix/WorkFlowSE.py"+
                                                                                                      "--cytomine_host $cytomine_host" +
                                                                                                      "--cytomine_public_key $cytomine_public_key" +
                                                                                                      "--cytomine_private_key $cytomine_private_key" +
                                                                                                      "--cytomine_id_software $cytomine_id_software" +
-                                                                                                     "--cytomine_working_path algo/simple_elastix" +
+                                                                                                     "--cytomine_working_path software_routeur/algo/simple_elastix" +
                                                                                                      "--cytomine_id_project $cytomine_id_project" +
                                                                                                      "--fix_image_id fix_image" +
                                                                                                      "--mov_image_id $id_mov_image" +
