@@ -57,4 +57,3 @@ if __name__ == "__main__":
     conn.add_software_parameter(name="cytomine_id_software",id_software=software.id,type= "Number",default_value= 0,required= True, index=100, set_by_server=True)
     conn.add_software_parameter(name="cytomine_id_project",id_software=software.id,type= "Number",default_value= 0,required= True, index=110, set_by_server=True)
     conn.add_software_parameter(name="export_overlay_images" , id_software= software.id, type="Boolean", default_value=False ,required=True, index= 120, set_by_server=False)
-
