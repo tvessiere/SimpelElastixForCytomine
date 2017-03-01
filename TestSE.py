@@ -4,35 +4,24 @@ import scipy.misc as misc
 import numpy as np
 import csv
 from openslide import *
-"""
-ndpi_path : path to .ndpi image
-r : rescale factor
-returns: ndpi image resized by factor r in PIL (Image) format
-"""
-def open_and_resize(ndpi_path):
-    image = OpenSlide(ndpi_path)
-    (h,w) = image.dimensions
-    grey_img = np.asarray(image.get_thumbnail(h, w).convert(mode='L')).astype('double')
-    color_img = np.asarray(image.get_thumbnail(h, w)).astype('double')
-    image.close()
-    return grey_img,color_img
+
 
 SimpleElastix = sitk.SimpleElastix()
 
-iterationNumbers = 6000
+iterationNumbers = 512
 samplingAttemps = 8
 spatialSamples = 6000
 
-"""
+
 FixImage = sitk.ReadImage("/home/tvessiere/Pictures/fixtissu.png",sitk.sitkFloat32)
 MovingImage = sitk.ReadImage("/home/tvessiere/Pictures/movtissu.png",sitk.sitkFloat32)
-"""
 
-fix_image_grey = misc.imread("/home/tvessiere/Pictures/fixtissu2.png",mode='F')
-fix_image_color = misc.imread("/home/tvessiere/Pictures/fixtissu2.png",mode='RGB')
 
-mov_image_grey =  misc.imread("/home/tvessiere/Pictures/movtissu2.png",mode='F')
-mov_image_color = misc.imread("/home/tvessiere/Pictures/movtissu2.png",mode='RGB')
+fix_image_grey = misc.imread("/home/tvessiere/Pictures/fixtissu.png",mode='F')
+fix_image_color = misc.imread("/home/tvessiere/Pictures/fixtissu.png",mode='RGB')
+
+mov_image_grey =  misc.imread("/home/tvessiere/Pictures/movtissu.png",mode='F')
+mov_image_color = misc.imread("/home/tvessiere/Pictures/movtissu.png",mode='RGB')
 
 itk_fix_image = sitk.GetImageFromArray(fix_image_grey)
 itk_mov_image = sitk.GetImageFromArray(mov_image_grey)
@@ -59,13 +48,93 @@ SimpleElastix.SetParameter("WriteIterationInfo" , "true")
 SimpleElastix.Execute()
 
 
-map = SimpleElastix.GetTransformParameterMap()
-
+transform_map = SimpleElastix.GetTransformParameterMap()
+properties_map = {}
 
 np_img = sitk.GetArrayFromImage(SimpleElastix.GetResultImage())
 TransformX = sitk.SimpleTransformix()
-TransformX.SetTransformParameterMap(map)
-print type(TransformX.PrintParameterMap())
+TransformX.SetTransformParameterMap(transform_map)
+
+# translation #
+param = TransformX.GetTransformParameter(0,"DefaultPixelValue")
+properties_map["sitk_translation_default_pixel_value"] = param[0] # float #
+param = TransformX.GetTransformParameter(0,"Direction")
+properties_map["sitk_translation_direction"] = param # tuple with 4 ints #
+param = TransformX.GetTransformParameter(0,"FinalBSplineInterpolationOrder")
+properties_map["sitk_translation_final_bspline_interpolation_order"] = param[0] # int #
+param = TransformX.GetTransformParameter(0,"FixedImageDimension")
+properties_map["sitk_translation_fixed_image_dimension"] = param[0] # int #
+param = TransformX.GetTransformParameter(0,"FixedInternalImagePixelType")
+properties_map["sitk_translation_fixed_internal_image_pixel_type"] = param[0] # string #
+param = TransformX.GetTransformParameter(0,"HowToCombineTransforms")
+properties_map["sitk_translation_how_combine_transforms"] = param[0] # string #
+param = TransformX.GetTransformParameter(0,"Index")
+properties_map["sitk_translation_index"] = param # tuple with 2 int #
+param = TransformX.GetTransformParameter(0,"InitialTransformParametersFileName")
+properties_map["sitk_translation_initial_transform_parameters_file_name"] = param[0] # string #
+param = TransformX.GetTransformParameter(0,"MovingImageDimension")
+properties_map["sitk_translation_moving_image_dimension"] = param[0] # int #
+param = TransformX.GetTransformParameter(0,"MovingInternalImagePixelType")
+properties_map["sitk_translation_moving_internal_image_pixel_type"] = param[0] # string #
+param = TransformX.GetTransformParameter(0,"NumberOfParameters")
+properties_map["sitk_translation_number_of_parameters"] = param[0] # int #
+param = TransformX.GetTransformParameter(0,"Origin")
+properties_map["sitk_translation_origin"] = param # tuple with 2 ints #
+param = TransformX.GetTransformParameter(0,"ResampleInterpolator")
+properties_map["sitk_translation_resample_interpolator"] = param[0] # tuple with 2 ints #
+param = TransformX.GetTransformParameter(0,"Resampler")
+properties_map["sitk_translation_resampler"] = param[0] # string #
+param = TransformX.GetTransformParameter(0,"Spacing")
+properties_map["sitk_translation_spacing"] = param[0] # tuple with 2 ints #
+param = TransformX.GetTransformParameter(0,"Transform")
+properties_map["sitk_translation_transform"] = param[0] # string #
+param = TransformX.GetTransformParameter(0,"TransformParameters")
+properties_map["sitk_translation_transform_parameters"] = param # tuple with number_of_parameters floats #
+param = TransformX.GetTransformParameter(0,"UseDirectionCosines")
+properties_map["sitk_translation_use_directions_Cosines"] = bool(param[0]) # boolean #
+
+# affine #
+param = TransformX.GetTransformParameter(1,"CenterOfRotationPoint")
+properties_map["sitk_affine_centre_of_rotation_x"] = param[0] # int #
+properties_map["sitk_affine_centre_of_rotation_y"] = param[1] # int #
+param = TransformX.GetTransformParameter(1,"DefaultPixelValue")
+properties_map["sitk_affine_default_pixel_value"] = param[0] # int #
+param = TransformX.GetTransformParameter(1,"Direction")
+properties_map["sitk_affine_direction"] = param # tuple with 4 ints #
+param = TransformX.GetTransformParameter(1,"FinalBSplineInterpolationOrder")
+properties_map["sitk_affine_final_bspline_interpolator_order"] = param[0] # int #
+param = TransformX.GetTransformParameter(1,"FixedImageDimension")
+properties_map["sitk_affine_fixed_image_dimension"] = param[0] # int #
+param = TransformX.GetTransformParameter(1,"FixedInternalImagePixelType")
+properties_map["sitk_affine_fixed_internal_image_type"] = param[0] # string #
+param = TransformX.GetTransformParameter(1,"HowToCombineTransforms")
+properties_map["sitk_affine_how_to_combine_transform"] = param[0] # string #
+param = TransformX.GetTransformParameter(1,"Index")
+properties_map["sitk_affine_index"] = param # tuple with 2 ints #
+param = TransformX.GetTransformParameter(1,"InitialTransformParametersFileName")
+properties_map["sitk_affine_initial_transform_parameter_file_name"] = param[0] # int #
+param = TransformX.GetTransformParameter(1,"MovingImageDimension")
+properties_map["sitk_affine_moving_image_dimension"] = param[0] # int #
+param = TransformX.GetTransformParameter(1,"NumberOfParameters")
+properties_map["sitk_affine_number_of_parameters"] = param[0] # int #
+param = TransformX.GetTransformParameter(1,"MovingInternalImagePixelType")
+properties_map["sitk_affine_moving_internal_image_pixel_type"] = param[0] # string #
+param = TransformX.GetTransformParameter(1,"Origin")
+properties_map["sitk_affine_origin"] = param # tuple with 2 ints #
+param = TransformX.GetTransformParameter(1,"ResampleInterpolator")
+properties_map["sitk_affine_resample_interpolator"] = param[0] # string #
+param = TransformX.GetTransformParameter(1,"Resampler")
+properties_map["sitk_affine_resample_Resampler"] = param[0] # string #
+param = TransformX.GetTransformParameter(1,"Transform")
+properties_map["sitk_affine_transform"] = param[0] # string #
+param = TransformX.GetTransformParameter(1,"TransformParameters")
+properties_map["sitk_affine_transform_parameters"] = param # tuple with sitk_affine_number_of_parameters float #
+param = TransformX.GetTransformParameter(1,"UseDirectionCosines")
+properties_map["sitk_affine_use_direction_Cosines"] = bool(param[0]) # boolean #
+param = TransformX.GetTransformParameter(1,"Spacing")
+properties_map["sitk_affine_Spacing"] = param # tuple with 2 ints #
+print len(properties_map)
+
 TransformX.SetMovingImage(itk_mov_image_color_0)
 img_to_save_0 = TransformX.Execute()
 TransformX.SetMovingImage(itk_mov_image_color_1)
@@ -87,3 +156,4 @@ misc.imsave("result_color.png",img_color_final)
 #misc.imsave("a_fix.png",sitk.GetArrayFromImage(FixImage))
 #misc.imsave("a_moving.png",sitk.GetArrayFromImage(MovingImage))
 #misc.imsave("a_result_elastix.png",sitk.GetArrayFromImage(SimpleElastix.GetResultImage()))
+
