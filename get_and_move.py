@@ -267,7 +267,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
 
 def main(argv):
 
-    # parsing arguments
+    # parsing arguments #
     parser = ArgumentParser(prog="get_and_move.py", description="workflow with simple elastix")
 
     parser.add_argument('--cytomine_host', dest="cytomine_host", default='demo.cytomine.be')
@@ -303,7 +303,7 @@ def main(argv):
                     cytomine, arguments.cytomine_id_software, arguments.cytomine_id_project, arguments.__dict__,
                     arguments.id_fix_image, arguments.id_mov_image, arguments.nb_iterations, arguments.nb_spatialsampels,
                     arguments.storage_id, arguments.id_annotation_fix, arguments.id_annotation_moving, arguments.working_path,
-                    arguments.cytomine_upload,arguments.cytomine_public_key, arguments.cytomine_private_key,arguments.export_overlay_images
+                    arguments.cytomine_upload,arguments.cytomine_public_key, arguments.cytomine_private_key,arguments.export_overlay_images,
                  ) as context:
 
         context.run()
