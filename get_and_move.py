@@ -170,13 +170,13 @@ class SimpleElastixJob(CytomineJob, Loggable):
         param = transform_x.GetTransformParameter(0, "Origin")
         properties_map["sitk_translation_origin"] = param  # tuple with 2 ints #
         param = transform_x.GetTransformParameter(0, "ResampleInterpolator")
-        properties_map["sitk_translation_resample_interpolator"] = param[0]  # tuple with 2 ints #
+        properties_map["sitk_translation_resample_interpolator"] = param[0]  # string #
         param = transform_x.GetTransformParameter(0, "Resampler")
         properties_map["sitk_translation_resampler"] = param[0]  # string #
         param = transform_x.GetTransformParameter(0, "Spacing")
-        properties_map["sitk_translation_spacing"] = param[0]  # tuple with 2 ints #
+        properties_map["sitk_translation_spacing"] = param  # tuple with 2 ints #
         param = transform_x.GetTransformParameter(0, "Transform")
-        properties_map["sitk_translation_transform"] = param[ 0]  # string #
+        properties_map["sitk_translation_transform"] = param[0]  # string #
         param = transform_x.GetTransformParameter(0, "TransformParameters")
         properties_map["sitk_translation_transform_parameters"] = param  # tuple with number_of_parameters floats #
         param = transform_x.GetTransformParameter(0, "UseDirectionCosines")
