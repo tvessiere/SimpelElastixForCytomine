@@ -66,7 +66,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
                                     (
                                         annotations=collection_fix,
                                         get_image_url_func=self._cytomine.Annotation.get_annotation_crop_url,
-                                        dest_path= os.path.join(self._working_path,"images",str(self.job.id),"annotation_fix"),
+                                        dest_path=os.path.join(self._working_path,"images",str(self.job.id),"annotation_fix"),
                                         desired_zoom=0
                                     )
 
@@ -78,7 +78,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
                                     (
                                         annotations=collection_moving,
                                         get_image_url_func=self._cytomine.Annotation.get_annotation_crop_url,
-                                        dest_path = os.path.join(self._working_path,"images",str(self.job.id),"annotation_moving"),
+                                        dest_path=os.path.join(self._working_path,"images",str(self.job.id),"annotation_moving"),
                                         desired_zoom=0
                                     )
 
