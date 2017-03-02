@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     cytomine_host = "demo.cytomine.be"
     Pk = 'cbfe0e04-3fd7-4a7f-a13c-b86685ecb570'
-    Prk = 'XXXXXX'
+    Prk = 'XXXXXXX'
     id_project = 19941904
 
     # Connection to Cytomine Core
