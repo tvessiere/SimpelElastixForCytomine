@@ -12,12 +12,14 @@ import numpy as np
 import shutil
 import os
 
+
 class SimpleElastixJob(CytomineJob, Loggable):
 
     # set parameters for your algo, 4 first params must be like this #
     def __init__(self, cytomine, software_id, project_id, job_parameters,
                  fix_image_id, moving_image_id, nb_spatial_sample, nb_iterations, storage_id,
-                 id_annotation_fix, id_annotation_moving, working_path, cytomine_host, cytomine_upload, pk, prk,exort_overlay_images):
+                 id_annotation_fix, id_annotation_moving, working_path, cytomine_host, cytomine_upload, pk, prk,
+                 export_overlay_images):
 
         # call init from parent classes #
         CytomineJob.__init__(self, cytomine, software_id, project_id, """parameters=job_parameters""" )
@@ -38,7 +40,8 @@ class SimpleElastixJob(CytomineJob, Loggable):
         self._project_id = project_id
         self._pk = pk
         self._prk = prk
-        self._overlayed_images = exort_overlay_images
+        self._overlayed_images = export_overlay_images
+        self._job_parameters = job_parameters
 
     # run methode, the logic of your algorithm is here #
     # DONT FORGET TO COMPLETE PATH WITH ID_JOB #
@@ -97,8 +100,6 @@ class SimpleElastixJob(CytomineJob, Loggable):
             print "path_to_fix_image : " + str(path_to_fix_image)
             print "path_to_moving_image : " + str(path_to_moving_image)
 
-
-
         # load images #
         fix_image_grey = misc.imread(path_to_fix_image, mode='F')
         fix_image_color = misc.imread(path_to_fix_image, mode='RGB')
@@ -145,83 +146,53 @@ class SimpleElastixJob(CytomineJob, Loggable):
         transform_x.SetTransformParameterMap(transform_map)
 
         # translation map #
-        param = transform_x.GetTransformParameter(0, "DefaultPixelValue")
-        properties_map["sitk_translation_default_pixel_value"] = param[0]  # float #
-        param = transform_x.GetTransformParameter(0, "Direction")
-        properties_map[ "sitk_translation_direction"] = param  # tuple with 4 ints #
-        param = transform_x.GetTransformParameter(0, "FinalBSplineInterpolationOrder")
-        properties_map["sitk_translation_final_bspline_interpolation_order"] = param[0]  # int #
-        param = transform_x.GetTransformParameter(0, "FixedImageDimension")
-        properties_map["sitk_translation_fixed_image_dimension"] = param[0]  # int #
-        param = transform_x.GetTransformParameter(0, "FixedInternalImagePixelType")
-        properties_map["sitk_translation_fixed_internal_image_pixel_type"] = param[0]  # string #
-        param = transform_x.GetTransformParameter(0, "HowToCombineTransforms")
-        properties_map["sitk_translation_how_combine_transforms"] = param[0]  # string #
-        param = transform_x.GetTransformParameter(0, "Index")
-        properties_map["sitk_translation_index"] = param  # tuple with 2 int #
-        param = transform_x.GetTransformParameter(0, "InitialTransformParametersFileName")
-        properties_map["sitk_translation_initial_transform_parameters_file_name"] = param[0]  # string #
-        param = transform_x.GetTransformParameter(0, "MovingImageDimension")
-        properties_map["sitk_translation_moving_image_dimension"] = param[0]  # int #
-        param = transform_x.GetTransformParameter(0, "MovingInternalImagePixelType")
-        properties_map["sitk_translation_moving_internal_image_pixel_type"] = param[0]  # string #
-        param = transform_x.GetTransformParameter(0, "NumberOfParameters")
-        properties_map["sitk_translation_number_of_parameters"] = param[0]  # int #
-        param = transform_x.GetTransformParameter(0, "Origin")
-        properties_map["sitk_translation_origin"] = param  # tuple with 2 ints #
-        param = transform_x.GetTransformParameter(0, "ResampleInterpolator")
-        properties_map["sitk_translation_resample_interpolator"] = param[0]  # string #
-        param = transform_x.GetTransformParameter(0, "Resampler")
-        properties_map["sitk_translation_resampler"] = param[0]  # string #
-        param = transform_x.GetTransformParameter(0, "Spacing")
-        properties_map["sitk_translation_spacing"] = param  # tuple with 2 ints #
-        param = transform_x.GetTransformParameter(0, "Transform")
-        properties_map["sitk_translation_transform"] = param[0]  # string #
-        param = transform_x.GetTransformParameter(0, "TransformParameters")
-        properties_map["sitk_translation_transform_parameters"] = param  # tuple with number_of_parameters floats #
-        param = transform_x.GetTransformParameter(0, "UseDirectionCosines")
-        properties_map["sitk_translation_use_directions_Cosines"] = bool(param[0])  # boolean #
+        dict_translation = {
+            "DefaultPixelValue": ("sitk_translation_default_pixel_value", False),  # int #
+            "Direction": ("sitk_translation_direction", True),  # tuple with 4 ints #
+            "FinalBSplineInterpolationOrder": ("sitk_translation_final_bspline_interpolation_order", False),  # int #
+            "FixedImageDimension": ("sitk_translation_fixed_image_dimension", False),  # int #
+            "FixedInternalImagePixelType": ("sitk_translation_fixed_internal_image_pixel_type", False),  # string #
+            "HowToCombineTransforms": ("sitk_translation_how_combine_transforms", False),  # string #
+            "Index": ("sitk_translation_index", True),  # tuple with 2 int #
+            "InitialTransformParametersFileName": ("sitk_translation_initial_transform_parameters_file_name", False),
+            "MovingImageDimension": ("sitk_translation_moving_image_dimension", False),
+            "MovingInternalImagePixelType": ("sitk_translation_moving_internal_image_pixel_type", False),
+            "NumberOfParameters": ("sitk_translation_number_of_parameters", False),
+            "Origin": ("sitk_translation_origin", True),
+            "ResampleInterpolator": ("sitk_translation_resample_interpolator", False),
+            "Resampler": ("sitk_translation_resampler", False),
+            "Spacing": ("sitk_translation_spacing", True),
+            "Transform": ("sitk_translation_transform", False),
+            "TransformParameters": ("sitk_translation_transform_parameters", True),
+            "UseDirectionCosines": ("sitk_translation_use_directions_Cosines", False),
+        }
 
-        # affine map #
-        param = transform_x.GetTransformParameter(1, "CenterOfRotationPoint")
-        properties_map["sitk_affine_centre_of_rotation_x"] = param[0]  # int #
-        properties_map["sitk_affine_centre_of_rotation_y"] = param[1]  # int #
-        param = transform_x.GetTransformParameter(1, "DefaultPixelValue")
-        properties_map["sitk_affine_default_pixel_value"] = param[0]  # int #
-        param = transform_x.GetTransformParameter(1, "Direction")
-        properties_map["sitk_affine_direction"] = param  # tuple with 4 ints #
-        param = transform_x.GetTransformParameter(1, "FinalBSplineInterpolationOrder")
-        properties_map["sitk_affine_final_bspline_interpolator_order"] = param[0]  # int #
-        param = transform_x.GetTransformParameter(1, "FixedImageDimension")
-        properties_map["sitk_affine_fixed_image_dimension"] = param[0]  # int #
-        param = transform_x.GetTransformParameter(1, "FixedInternalImagePixelType")
-        properties_map["sitk_affine_fixed_internal_image_type"] = param[0]  # string #
-        param = transform_x.GetTransformParameter(1, "HowToCombineTransforms")
-        properties_map["sitk_affine_how_to_combine_transform"] = param[0]  # string #
-        param = transform_x.GetTransformParameter(1, "Index")
-        properties_map["sitk_affine_index"] = param  # tuple with 2 ints #
-        param = transform_x.GetTransformParameter(1, "InitialTransformParametersFileName")
-        properties_map["sitk_affine_initial_transform_parameter_file_name"] = param[0]  # int #
-        param = transform_x.GetTransformParameter(1, "MovingImageDimension")
-        properties_map["sitk_affine_moving_image_dimension"] = param[0]  # int #
-        param = transform_x.GetTransformParameter(1, "NumberOfParameters")
-        properties_map["sitk_affine_number_of_parameters"] = param[0]  # int #
-        param = transform_x.GetTransformParameter(1, "MovingInternalImagePixelType")
-        properties_map["sitk_affine_moving_internal_image_pixel_type"] = param[0]  # string #
-        param = transform_x.GetTransformParameter(1, "Origin")
-        properties_map["sitk_affine_origin"] = param  # tuple with 2 ints #
-        param = transform_x.GetTransformParameter(1, "ResampleInterpolator")
-        properties_map["sitk_affine_resample_interpolator"] = param[0]  # string #
-        param = transform_x.GetTransformParameter(1, "Resampler")
-        properties_map["sitk_affine_resample_Resampler"] = param[0]  # string #
-        param = transform_x.GetTransformParameter(1, "Transform")
-        properties_map["sitk_affine_transform"] = param[0]  # string #
-        param = transform_x.GetTransformParameter(1, "TransformParameters")
-        properties_map["sitk_affine_transform_parameters"] = param  # tuple with sitk_affine_number_of_parameters float #
-        param = transform_x.GetTransformParameter(1, "UseDirectionCosines")
-        properties_map["sitk_affine_use_direction_Cosines"] = bool(param[0])  # boolean #
-        param = transform_x.GetTransformParameter(1, "Spacing")
-        properties_map["sitk_affine_Spacing"] = param  # tuple with 2 ints #
+        ComposeProperties(dict_translation, 0,properties_map,transform_x)
+
+        dict_affine = {
+            "CenterOfRotationPoint": ("sitk_affine_centrer_of_rotation", True),
+            "DefaultPixelValue": ("sitk_affine_default_pixel_value", False),
+            "Direction": ("sitk_affine_direction", True),
+            "FinalBSplineInterpolationOrder": ("sitk_affine_final_bspline_interpolation_order", False),
+            "FixedImageDimension": ("sitk_affine_fixed_image_dimension", False),
+            "FixedInternalImagePixelType": ("sitk_affine_fixed_internal_image_pixel_type", False),
+            "HowToCombineTransforms": ("sitk_affine_how_combine_transforms", False),
+            "Index": ("sitk_affine_index", True),
+            "InitialTransformParametersFileName": ("sitk_affine_initial_transform_parameters_file_name", False),
+            "MovingImageDimension": ("sitk_affine_moving_image_dimension", False),
+            "MovingInternalImagePixelType": ("sitk_affine_moving_internal_image_pixel_type", False),
+            "NumberOfParameters": ("sitk_affine_number_of_parameters", False),
+            "Origin": ("sitk_affine_origin", True),
+            "ResampleInterpolator": ("sitk_affine_resample_interpolator", False),
+            "Resampler": ("sitk_affine_resampler", False),
+            "Spacing": ("sitk_affine_spacing", True),
+            "Transform": ("sitk_affine_transform", False),
+            "TransformParameters": ("sitk_affine_transform_parameters", True),
+            "UseDirectionCosines": ("sitk_affine_use_directions_Cosines", False),
+        }
+
+        ComposeProperties(dict_affine, 1,properties_map,transform_x)
+
 
         # apply transforms on all channels #
         transform_x.SetMovingImage(itk_mov_image_color_0)
@@ -289,8 +260,7 @@ def main(argv):
     arguments, others = parser.parse_known_args(argv)
 
     # connection to demo #
-    cytomine = Cytomine\
-        (
+    cytomine = Cytomine(
             arguments.cytomine_host,
             arguments.cytomine_public_key,
             arguments.cytomine_private_key,
@@ -298,12 +268,25 @@ def main(argv):
         )
 
     # instance SimpleElastixJob object and run the logic of the algorithm #
-    with SimpleElastixJob\
-                 (
-                    cytomine, arguments.cytomine_id_software, arguments.cytomine_id_project, arguments.__dict__,
-                    arguments.id_fix_image, arguments.id_mov_image, arguments.nb_iterations, arguments.nb_spatialsampels,
-                    arguments.storage_id, arguments.id_annotation_fix, arguments.id_annotation_moving, arguments.working_path,
-                    arguments.cytomine_upload,arguments.cytomine_public_key, arguments.cytomine_private_key,arguments.export_overlay_images,
-                 ) as context:
+    with SimpleElastixJob(
+        cytomine, arguments.cytomine_id_software, arguments.cytomine_id_project, arguments.__dict__,
+        arguments.id_fix_image, arguments.id_mov_image, arguments.nb_spatialsampels, arguments.nb_iterations,
+        arguments.storage_id, arguments.id_annotation_fix, arguments.id_annotation_moving, arguments.working_path,
+        arguments.cytomine_host,arguments.cytomine_upload,arguments.cytomine_public_key, arguments.cytomine_private_key,
+        arguments.export_overlay_images,
+        ) as context:
 
         context.run()
+
+def ComposeProperties(dictionnaire,mode,properties_map,transform_x):
+    for param_name, prop_name in dictionnaire.items():
+        if prop_name[1] == False:
+            properties_map[prop_name[0]] = transform_x.GetTransformParameter(mode,param_name)[0]
+        else:
+            for i,v in enumerate(transform_x.GetTransformParameter(mode,param_name)):
+                properties_map["{}_{}".format(prop_name[0],i)] = v
+    print properties_map
+
+if __name__ == "__main__":
+    import sys
+    main(sys.argv[1:])
