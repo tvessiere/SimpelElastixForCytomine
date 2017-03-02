@@ -54,7 +54,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
 
             # debug #
             print "path_to_fix_image : " + str(path_to_fix_image)
-            print "path_to_moving_image" + str(path_to_moving_image)
+            print "path_to_moving_image : " + str(path_to_moving_image)
 
         else:
             # dump annotations#
