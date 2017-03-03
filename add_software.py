@@ -26,7 +26,7 @@ if __name__ == "__main__":
     )
 
     #add software with execute command
-    software = conn.add_software("SE_TranslationAffine7","createRabbitJobWithArgsService","download","python algo/Simple_Elastix/WorkFlowSE.py"+
+    software = conn.add_software("SE_TranslationAffine7","createRabbitJobWithArgsService","download","python software_routeur/algo/simple_elastix/get_and_move.py"+
                                                                                                      "--cytomine_host $cytomine_host" +
                                                                                                      "--cytomine_public_key $cytomine_public_key" +
                                                                                                      "--cytomine_private_key $cytomine_private_key" +
