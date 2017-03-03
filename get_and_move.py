@@ -1,16 +1,16 @@
-
-__author__ = "Vessiere Thomas <vessiere.thomas@hotmail.com>"
-__Copyright__ = "Copyright 2010-2017 University of Liège, Belgium, http://www.cytomine.be/"
-
 from argparse import ArgumentParser
 from sldc import Loggable, Logger, StandardOutputLogger
 from cytomine import Cytomine
 from cytomine_utilities import CytomineJob
+from cytomine import models
 import SimpleITK as sitk
 import scipy.misc as misc
 import numpy as np
 import shutil
 import os
+
+__author__ = "Vessiere Thomas <vessiere.thomas@hotmail.com>"
+__Copyright__ = "Copyright 2010-2017 University of Liège, Belgium, http://www.cytomine.be/"
 
 
 class SimpleElastixJob(CytomineJob, Loggable):
@@ -44,7 +44,6 @@ class SimpleElastixJob(CytomineJob, Loggable):
         self._job_parameters = job_parameters
 
     # run methode, the logic of your algorithm is here #
-    # DONT FORGET TO COMPLETE PATH WITH ID_JOB #
     def run(self):
 
         if not self._id_annotation_fix and not self._id_annotation_fix:
@@ -62,26 +61,26 @@ class SimpleElastixJob(CytomineJob, Loggable):
         else:
             # dump annotations#
             annotation_fix = self._cytomine.get_annotation(self._fix_image_id)
-            collection_fix = self._cytomine.AnnotationCollection()
+            collection_fix = models.AnnotationCollection()
             collection_fix.data().append(annotation_fix)
 
             self._cytomine.dump_annotations\
                                     (
                                         annotations=collection_fix,
-                                        get_image_url_func=self._cytomine.Annotation.get_annotation_crop_url,
-                                        dest_path=os.path.join(self._working_path,"images",str(self.job.id),"annotation_fix"),
+                                        get_image_url_func=models.Annotation.get_annotation_crop_url,
+                                        dest_path=os.path.join(self._working_path,"images",str(self.job.id), "annotation_fix"),
                                         desired_zoom=0
                                     )
 
             annotation_moving = self._cytomine.get_annotation(self._id_annotation_moving)
-            collection_moving = self._cytomine.AnnotationCollection()
+            collection_moving = models.AnnotationCollection()
             collection_moving.data().append(annotation_moving)
 
             self._cytomine.dump_annotations\
                                     (
                                         annotations=collection_moving,
-                                        get_image_url_func=self._cytomine.Annotation.get_annotation_crop_url,
-                                        dest_path=os.path.join(self._working_path,"images",str(self.job.id),"annotation_moving"),
+                                        get_image_url_func=models.Annotation.get_annotation_crop_url,
+                                        dest_path=os.path.join(self._working_path,"images",str(self.job.id), "annotation_moving"),
                                         desired_zoom=0
                                     )
 
@@ -146,6 +145,14 @@ class SimpleElastixJob(CytomineJob, Loggable):
         transform_x.SetTransformParameterMap(transform_map)
 
         # translation map #
+        # IMPORTANT FOR UNDERSTAND #
+        # those dicts are specific here, i added a tuple with a boolean for know if i need to get one or all element
+        # in the tuple returned by sitk, after that i give to the function "ComposeProperties" the dict, mode(number
+        # of parameter map (e.g : 0 || 1 etc)) the properties map to link at the image and the transform_x object.
+        # Basically if the boolean is True, got all the parameters of the tuple
+        # and format it for got a single Key/value pair like direction_0 = x, direction_1 = y. If the boolean is
+        # False, only get the first element #
+
         dict_translation = {
             "DefaultPixelValue": ("sitk_translation_default_pixel_value", False),  # int #
             "Direction": ("sitk_translation_direction", True),  # tuple with 4 ints #
@@ -191,8 +198,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
             "UseDirectionCosines": ("sitk_affine_use_directions_Cosines", False),
         }
 
-        ComposeProperties(dict_affine, 1,properties_map,transform_x)
-
+        ComposeProperties(dict_affine, 1, properties_map, transform_x)
 
         # apply transforms on all channels #
         transform_x.SetMovingImage(itk_mov_image_color_0)
@@ -210,27 +216,24 @@ class SimpleElastixJob(CytomineJob, Loggable):
         img_color_final[:, :, 2] = sitk.GetArrayFromImage(img_to_save_2)
 
         # save images #
-        # DONT FORGET TO FORMAT THE MAP FOR IMAGE'S PROPERTIES #
-        img_transform_to_save_path = os.path.join(self._working_path, "images", str(self.job.id),"result_translationaffine.png")
+        img_transform_to_save_path = os.path.join(self._working_path, "images", str(self.job.id), "result_translationaffine.png")
 
         if(self._overlayed_images == True):
-            img_overlay_to_save_path = os.path.join(self._working_path, "images", str(self.job.id),"overlayed_images.png")
+            img_overlay_to_save_path = os.path.join(self._working_path, "images", str(self.job.id), "overlayed_images.png")
             misc.imsave(img_transform_to_save_path,img_color_final)
-            misc.imsave(img_overlay_to_save_path, img_color_final + (0.75 * fix_image_color))
+            misc.imsave(img_overlay_to_save_path, img_color_final + (0.80 * fix_image_color))
 
-            # connection to demo-upload #
+            # connection to demo-upload & upload #
             demo_upload = Cytomine(self._cytomine_upload, self._pk, self._prk, verbose=True)
             demo_upload.upload_image(img_transform_to_save_path, self._project_id, self._storage_id, "http://demo.cytomine.be",properties=properties_map)
-            # DONT FORGET TO COMPLETE PROPERTIES #
             demo_upload.upload_image(img_overlay_to_save_path,self._project_id, self._storage_id, "http://demo.cytomine.be",properties=None)
 
         else:
             misc.imsave(img_transform_to_save_path, img_color_final)
             misc.imsave(img_transform_to_save_path,img_color_final)
 
-            # connection to demo-upload #
+            # connection to demo-upload & upload #
             demo_upload = Cytomine(self._cytomine_upload, self._pk, self._prk, verbose=True)
-            # DONT FORGET TO COMPLETE PROPERTIES #
             demo_upload.upload_image(img_transform_to_save_path, self._project_id, self._storage_id,  "http://demo.cytomine.be", properties=properties_map)
 
         # remove the directory of the current job #
@@ -278,15 +281,17 @@ def main(argv):
 
         context.run()
 
+# function for compose properties map, see above for more information #
 def ComposeProperties(dictionnaire,mode,properties_map,transform_x):
     for param_name, prop_name in dictionnaire.items():
-        if prop_name[1] == False:
+        if not prop_name[1]:
             properties_map[prop_name[0]] = transform_x.GetTransformParameter(mode,param_name)[0]
         else:
-            for i,v in enumerate(transform_x.GetTransformParameter(mode,param_name)):
-                properties_map["{}_{}".format(prop_name[0],i)] = v
+            for i, v in enumerate(transform_x.GetTransformParameter(mode,param_name)):
+                properties_map["{}_{}".format(prop_name[0], i)] = v
     print properties_map
 
+# call main #
 if __name__ == "__main__":
     import sys
     main(sys.argv[1:])
