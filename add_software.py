@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     cytomine_host = "demo.cytomine.be"
     Pk = 'cbfe0e04-3fd7-4a7f-a13c-b86685ecb570'
-    Prk = 'XXXXXXX'
+    Prk = '1e1cb3e8-ed0a-434d-b049-3a48552429c7'
     id_project = 19941904
 
     # Connection to Cytomine Core
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     )
 
     #add software with execute command
-    software = conn.add_software("SE_TranslationAffine8","createRabbitJobWithArgsService","download","python software_routeur/algo/simple_elastix/get_and_move.py "+
+    software = conn.add_software("SE_TranslationAffine10","createRabbitJobWithArgsService","download","python software_routeur/algo/simple_elastix/get_and_move.py "+
                                                                                                      "--cytomine_host $cytomine_host " +
                                                                                                      "--cytomine_public_key $cytomine_public_key " +
                                                                                                      "--cytomine_private_key $cytomine_private_key " +
@@ -56,7 +56,4 @@ if __name__ == "__main__":
     conn.add_software_parameter(name="annotation_moving_id",id_software=software.id,type= "Number",default_value=None,required=False,index=90,set_by_server=True)
     conn.add_software_parameter(name="cytomine_id_software",id_software=software.id,type= "Number",default_value= 0,required= True, index=100, set_by_server=True)
     conn.add_software_parameter(name="cytomine_id_project",id_software=software.id,type= "Number",default_value= 0,required= True, index=110, set_by_server=True)
-    conn.add_software_parameter(name="export_overlay_images" , id_software= software.id, type="Boolean", default_value=False ,required=True, index= 120, set_by_server=False)
-    conn.add_software_parameter(name="cytomine_host", id_software=software.id, type="string", default_value="http://demo.cytomine.be",index=130, set_by_server=True)
-    conn.add_software_parameter(name="cytomine_public_key", id_software=software.id, type="string", index=140, set_by_server=True)
-    conn.add_software_parameter(name="cytomine_private_key", id_software=software.id, type="string", index=150, set_by_server=True)
+    conn.add_software_parameter(name="export_overlay_images" , id_software= software.id, type="Boolean", default_value=False,required=True, index= 120, set_by_server=False)
