@@ -267,8 +267,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
         img_color_final[:, :, 2] = sitk.GetArrayFromImage(img_to_save_2)
 
         # save images #
-        img_transform_to_save_path = os.path.join(self._working_path, str(self.job.id), "images" , str(self._result_file_name),
-                                                  ".png")
+        img_transform_to_save_path = os.path.join(self._working_path, str(self.job.id), "images" , str(self._result_file_name))
 
         if (self._overlayed_images == "true"):
             img_overlay_to_save_path = os.path.join(self._working_path, str(self.job.id),"images",
