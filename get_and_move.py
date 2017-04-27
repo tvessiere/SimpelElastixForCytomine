@@ -279,9 +279,9 @@ class SimpleElastixJob(CytomineJob, Loggable):
             # connection to demo-upload & upload #
             demo_upload = Cytomine(self._cytomine_upload, self._pk, self._prk, verbose=True)
             demo_upload.upload_image(img_transform_to_save_path, self._project_id, self._storage_id,
-                                     "http://demo.cytomine.be", properties=properties_map)
+                                     str(self._cytomine_upload), properties=properties_map)
             demo_upload.upload_image(img_overlay_to_save_path, self._project_id, self._storage_id,
-                                     "http://demo.cytomine.be", properties=None)
+                                     str(self._cytomine_upload), properties=None)
 
         else:
             misc.imsave(img_transform_to_save_path, img_color_final)
@@ -289,7 +289,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
             # connection to demo-upload & upload #
             demo_upload = Cytomine(self._cytomine_upload, self._pk, self._prk, verbose=True)
             demo_upload.upload_image(img_transform_to_save_path, self._project_id, self._storage_id,
-                                     "http://demo.cytomine.be", properties=properties_map)
+                                     str(self._cytomine_upload), properties=properties_map)
 
         # remove the directory of the current job #
         shutil.rmtree(os.path.join(self._working_path, str(self.job.id)), ignore_errors=True)
@@ -310,12 +310,13 @@ def main(argv):
     parser.add_argument('--nb_iterations', dest="nb_iterations")
     parser.add_argument("--nb_spatialsampels", dest="nb_spatialsampels")
     parser.add_argument("--cytomine_storage_id", dest="storage_id")
-    parser.add_argument("--cytomine_id_annotation_fix", dest="id_annotation_fix")
-    parser.add_argument("--cytomine_id_annotation_moving", dest="id_annotation_moving")
+    parser.add_argument("--cytomine_id_annotation_fix", dest="annotation_fix_id")
+    parser.add_argument("--cytomine_id_annotation_moving", dest="annotation_moving_id")
     parser.add_argument("--cytomine_working_path", dest="working_path")
     parser.add_argument("--cytomine_upload", dest="cytomine_upload")
     parser.add_argument("--export_overlay_images", dest="export_overlay_images")
-
+    parser.add_argument("--number_of_resolution", dest="number_of_resolution")
+    parser.add_argument("--result_file_name", dest="result_file_name")
     arguments, others = parser.parse_known_args(argv)
 
     # connection to demo #
@@ -339,7 +340,7 @@ def main(argv):
             arguments.cytomine_host, arguments.cytomine_upload, arguments.cytomine_public_key,
             arguments.cytomine_private_key,
             arguments.export_overlay_images,
-            arguments.number_of_resolutions,
+            arguments.number_of_resolution,
             arguments.result_file_name
     ) as context:
         context.run()
