@@ -279,17 +279,16 @@ class SimpleElastixJob(CytomineJob, Loggable):
             # connection to demo-upload & upload #
             demo_upload = Cytomine(self._cytomine_upload, self._pk, self._prk, verbose=True)
             demo_upload.upload_image(img_transform_to_save_path, self._project_id, self._storage_id,
-                                     str(self._cytomine_upload), properties=properties_map)
+                                     "http://" + str(self._cytomine_host), properties=properties_map)
             demo_upload.upload_image(img_overlay_to_save_path, self._project_id, self._storage_id,
-                                     str(self._cytomine_upload), properties=None)
+                                     "http://"+str(self._cytomine_host), properties=None)
 
         else:
             misc.imsave(img_transform_to_save_path, img_color_final)
 
             # connection to demo-upload & upload #
             demo_upload = Cytomine(self._cytomine_upload, self._pk, self._prk, verbose=True)
-            demo_upload.upload_image(img_transform_to_save_path, self._project_id, self._storage_id,
-                                     str(self._cytomine_upload), properties=properties_map)
+            demo_upload.upload_image(img_transform_to_save_path, self._project_id, self._storage_id,"http://"+str(self._cytomine_host), properties=properties_map)
 
         # remove the directory of the current job #
         shutil.rmtree(os.path.join(self._working_path, str(self.job.id)), ignore_errors=True)
