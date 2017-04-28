@@ -75,13 +75,13 @@ class SimpleElastixJob(CytomineJob, Loggable):
         path_job = os.path.join(self._working_path,str(self.job.id))
         print "path job = " + path_job
         os.mkdir(path_job)
-        if not self._id_annotation_fix and not self._id_annotation_fix:
+        if self._id_annotation_fix == "" and self._id_annotation_fix == "":
             # dump images #
             # fix #
-            fix_image_instance = self._cytomine.get_image_instance(int(self._fix_image_id))
+            fix_image_instance = self._cytomine.get_image_instance(long(self._fix_image_id))
             fix_collection = models.ImageInstanceCollection()
             fix_collection.data().append(fix_image_instance)
-            self._cytomine.dump_project_images(image_instances=fix_collection, id_project=int(self._project_id),
+            self._cytomine.dump_project_images(image_instances=fix_collection, id_project=long(self._project_id),
                                                dest_path=os.path.join(str(self.job.id),"images/"),
                                                override=False, max_size=5000)
 
@@ -89,7 +89,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
             moving_image_instance = self._cytomine.get_image_instance(int(self._moving_image_id))
             moving_collection = models.ImageInstanceCollection()
             moving_collection.data().append(moving_image_instance)
-            self._cytomine.dump_project_images(image_instances=moving_collection, id_project=int(self._project_id),
+            self._cytomine.dump_project_images(image_instances=moving_collection, id_project=long(self._project_id),
                                                dest_path= os.path.join(str(self.job.id),"images/"),
                                                override=False, max_size=5000)
             # format paths #
@@ -104,37 +104,38 @@ class SimpleElastixJob(CytomineJob, Loggable):
 
         else:
             # dump annotations#
-            annotation_fix = self._cytomine.get_annotation(int(self._fix_image_id))
+            annotation_fix = self._cytomine.get_annotation(long(self._id_annotation_fix))
             collection_fix = models.AnnotationCollection()
             collection_fix.data().append(annotation_fix)
+            #os.makedirs(os.path.join(self._working_path,str(self.job.id),"images", "annotation_fix/"))
+            print len(collection_fix)
             self._cytomine.dump_annotations \
                     (
                     annotations=collection_fix,
                     get_image_url_func=models.Annotation.get_annotation_crop_url,
-                    dest_path=os.path.join(str(self.job.id),"images", "annotation_fix/"),
+                    dest_path=os.path.join(self._working_path,str(self.job.id),"images", "annotation_fix/"),
                     desired_zoom=0
                 )
-
-            annotation_moving = self._cytomine.get_annotation(int(self._id_annotation_moving))
+            print "dest path dump " + os.path.join(str(self.job.id), "images", "annotation_fix")
+            annotation_moving = self._cytomine.get_annotation(long(self._id_annotation_moving))
             collection_moving = models.AnnotationCollection()
             collection_moving.data().append(annotation_moving)
-
+            #os.makedirs(os.path.join(self._working_path,str(self.job.id), "images", "annotation_moving/"))
+            print len(collection_moving)
             self._cytomine.dump_annotations \
                     (
                     annotations=collection_moving,
                     get_image_url_func=models.Annotation.get_annotation_crop_url,
-                    dest_path=os.path.join(str(self.job.id),"images", "annotation_moving/"),
+                    dest_path=os.path.join(self._working_path,str(self.job.id),"images", "annotation_moving/"),
                     desired_zoom=0
                 )
-
+            print "dest path dump " + os.path.join(str(self.job.id),"images", "annotation_moving")
             # get id_term for path #
             id_term = annotation_fix.term[0]
 
             # because the name of the file is vague, just list the file and get the elem at 0 #
-            list_fix = os.listdir(os.path.join("images", str(self.job.id), "annotation_fix"),
-                                  str(id_term))
-            list_moving = os.listdir(os.path.join("images", str(self.job.id), "annotation_moving"),
-                                     str(id_term))
+            list_fix = os.listdir(os.path.join(self._working_path,str(self.job.id), "images", "annotation_fix",str(id_term)))
+            list_moving = os.listdir(os.path.join(self._working_path,str(self.job.id), "images", "annotation_moving",str(id_term)))
 
             # format paths #
             path_to_fix_image = os.path.join(self._working_path,str(self.job.id), "images", "annotation_fix",
@@ -309,8 +310,8 @@ def main(argv):
     parser.add_argument('--nb_iterations', dest="nb_iterations")
     parser.add_argument("--nb_spatialsampels", dest="nb_spatialsampels")
     parser.add_argument("--cytomine_storage_id", dest="storage_id")
-    parser.add_argument("--cytomine_id_annotation_fix", dest="annotation_fix_id")
-    parser.add_argument("--cytomine_id_annotation_moving", dest="annotation_moving_id")
+    parser.add_argument("--annotation_fix_id", dest="annotation_fix_id")
+    parser.add_argument("--annotation_moving_id", dest="annotation_moving_id")
     parser.add_argument("--cytomine_working_path", dest="working_path")
     parser.add_argument("--cytomine_upload", dest="cytomine_upload")
     parser.add_argument("--export_overlay_images", dest="export_overlay_images")
