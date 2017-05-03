@@ -26,10 +26,10 @@ from cytomine import Cytomine
 from cytomine_utilities import CytomineJob
 from cytomine import models
 import SimpleITK as sitk
-import scipy.misc as misc
 import numpy as np
 import shutil
 import os
+import cv2
 
 
 class SimpleElastixJob(CytomineJob, Loggable):
@@ -148,26 +148,23 @@ class SimpleElastixJob(CytomineJob, Loggable):
             print "path_to_moving_image : " + str(path_to_moving_image)
 
         # load images #
-        fix_image_grey = misc.imread(path_to_fix_image, mode='F')
-        fix_image_color = misc.imread(path_to_fix_image, mode='RGB')
+        fix_image_grey = sitk.ReadImage(path_to_fix_image,sitk.sitkFloat32)
+        moving_image_grey = sitk.ReadImage(path_to_moving_image, sitk.sitkFloat32)
 
-        moving_image_grey = misc.imread(path_to_moving_image, mode='F')
-        moving_image_color = misc.imread(path_to_moving_image, mode='RGB')
-
-        # get images with ITK format #
-        itk_fix_image = sitk.GetImageFromArray(fix_image_grey)
-        itk_moving_image = sitk.GetImageFromArray(moving_image_grey)
+        # open img color with CV #
+        cv_moving_image = cv2.imread(path_to_moving_image)
+        cv_fix_image = cv2.imread(path_to_fix_image)
 
         # start processing algorithm #
         # got all the channel for keep orignal color #
-        itk_mov_image_color_0 = sitk.GetImageFromArray(moving_image_color[:, :, 0])
-        itk_mov_image_color_1 = sitk.GetImageFromArray(moving_image_color[:, :, 1])
-        itk_mov_image_color_2 = sitk.GetImageFromArray(moving_image_color[:, :, 2])
+        itk_mov_image_color_0 = sitk.GetImageFromArray(cv_moving_image[:, :, 0])
+        itk_mov_image_color_1 = sitk.GetImageFromArray(cv_moving_image[:, :, 1])
+        itk_mov_image_color_2 = sitk.GetImageFromArray(cv_moving_image[:, :, 2])
 
         # set ParamtersMap to sitk for compute transformation #
         simple_elastix = sitk.SimpleElastix()
-        simple_elastix.SetFixedImage(itk_fix_image)
-        simple_elastix.SetMovingImage(itk_moving_image)
+        simple_elastix.SetFixedImage(fix_image_grey)
+        simple_elastix.SetMovingImage(moving_image_grey)
         parameter_map_translation = sitk.GetDefaultParameterMap("translation")
         parameter_map_affine = sitk.GetDefaultParameterMap("affine")
 
@@ -273,8 +270,8 @@ class SimpleElastixJob(CytomineJob, Loggable):
         if (self._overlayed_images == "true"):
             img_overlay_to_save_path = os.path.join(self._working_path, str(self.job.id),"images",
                                                     "overlayed_images.png")
-            misc.imsave(img_transform_to_save_path, img_color_final)
-            misc.imsave(img_overlay_to_save_path, img_color_final + (0.80 * fix_image_color))
+            cv2.imsave(img_transform_to_save_path, img_color_final)
+            cv2.imsave(img_overlay_to_save_path, img_color_final + (0.80 * cv_fix_image))
 
             # connection to demo-upload & upload #
             demo_upload = Cytomine(self._cytomine_upload, self._pk, self._prk, verbose=True)
@@ -284,7 +281,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
                                      str(self._cytomine_host), properties=None)
 
         else:
-            misc.imsave(img_transform_to_save_path, img_color_final)
+            cv2.imsave(img_transform_to_save_path, img_color_final)
 
             # connection to demo-upload & upload #
             demo_upload = Cytomine(self._cytomine_upload, self._pk, self._prk, verbose=True)
