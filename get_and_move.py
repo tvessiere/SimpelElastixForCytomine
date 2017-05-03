@@ -270,8 +270,8 @@ class SimpleElastixJob(CytomineJob, Loggable):
         if (self._overlayed_images == "true"):
             img_overlay_to_save_path = os.path.join(self._working_path, str(self.job.id),"images",
                                                     "overlayed_images.png")
-            cv2.imsave(img_transform_to_save_path, img_color_final)
-            cv2.imsave(img_overlay_to_save_path, img_color_final + (0.80 * cv_fix_image))
+            cv2.imwrite(img_transform_to_save_path, img_color_final)
+            cv2.imwrite(img_overlay_to_save_path, img_color_final + (0.80 * cv_fix_image))
 
             # connection to demo-upload & upload #
             demo_upload = Cytomine(self._cytomine_upload, self._pk, self._prk, verbose=True)
@@ -281,7 +281,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
                                      str(self._cytomine_host), properties=None)
 
         else:
-            cv2.imsave(img_transform_to_save_path, img_color_final)
+            cv2.imwrite(img_transform_to_save_path, img_color_final)
 
             # connection to demo-upload & upload #
             demo_upload = Cytomine(self._cytomine_upload, self._pk, self._prk, verbose=True)
