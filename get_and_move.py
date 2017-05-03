@@ -290,7 +290,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
 
         # remove the directory of the current job #
         shutil.rmtree(os.path.join(self._working_path, str(self.job.id)), ignore_errors=True)
-
+        self.done(True)
 
 def main(argv):
     # parsing arguments #
@@ -357,5 +357,4 @@ def MakeUpProperties(dictionary, mode, properties_map, transform_x):
 # call main #
 if __name__ == "__main__":
     import sys
-
     main(sys.argv[1:])
