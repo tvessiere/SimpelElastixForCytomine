@@ -39,7 +39,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
     def __init__(self, cytomine, software_id, project_id, job_parameters,
                  fix_image_id, moving_image_id, nb_spatial_sample, nb_iterations, storage_id,
                  annotation_fix_id, annotation_moving_id, working_path, cytomine_host, cytomine_upload, pk, prk,
-                 export_overlay_images,number_of_resolutions,result_file_name):
+                 export_overlay_images, number_of_resolutions, result_file_name):
         print("After init")
         # call init from parent classes #
         print("project id = " + str(project_id))
@@ -68,11 +68,12 @@ class SimpleElastixJob(CytomineJob, Loggable):
         self._job_parameters = job_parameters
         self._number_of_resolutions = number_of_resolutions
         self._result_file_name = result_file_name
+
     # run method, the logic of your algorithm is here #
     def run(self):
 
         print "Start Running..."
-        path_job = os.path.join(self._working_path,str(self.job.id))
+        path_job = os.path.join(self._working_path, str(self.job.id))
         print "path job = " + path_job
         os.mkdir(path_job)
         if self._id_annotation_fix == "" and self._id_annotation_fix == "":
@@ -82,20 +83,20 @@ class SimpleElastixJob(CytomineJob, Loggable):
             fix_collection = models.ImageInstanceCollection()
             fix_collection.data().append(fix_image_instance)
             self._cytomine.dump_project_images(image_instances=fix_collection, id_project=long(self._project_id),
-                                               dest_path=os.path.join(str(self.job.id),"images/"),
-                                               override=False, max_size=5000)
+                                               dest_path=os.path.join(str(self.job.id), "images/"),
+                                               override=False, max_size=8000)
 
             # moving #
             moving_image_instance = self._cytomine.get_image_instance(int(self._moving_image_id))
             moving_collection = models.ImageInstanceCollection()
             moving_collection.data().append(moving_image_instance)
             self._cytomine.dump_project_images(image_instances=moving_collection, id_project=long(self._project_id),
-                                               dest_path= os.path.join(str(self.job.id),"images/"),
-                                               override=False, max_size=5000)
+                                               dest_path=os.path.join(str(self.job.id), "images/"),
+                                               override=False, max_size=8000)
             # format paths #
-            path_to_fix_image = os.path.join(self._working_path,str(self.job.id), "images", str(self._project_id),
+            path_to_fix_image = os.path.join(self._working_path, str(self.job.id), "images", str(self._project_id),
                                              str(self._fix_image_id) + ".jpg")
-            path_to_moving_image = os.path.join(self._working_path,str(self.job.id), "images", str(self._project_id),
+            path_to_moving_image = os.path.join(self._working_path, str(self.job.id), "images", str(self._project_id),
                                                 str(self._moving_image_id) + ".jpg")
 
             # debug #
@@ -107,40 +108,42 @@ class SimpleElastixJob(CytomineJob, Loggable):
             annotation_fix = self._cytomine.get_annotation(long(self._id_annotation_fix))
             collection_fix = models.AnnotationCollection()
             collection_fix.data().append(annotation_fix)
-            #os.makedirs(os.path.join(self._working_path,str(self.job.id),"images", "annotation_fix/"))
+            # os.makedirs(os.path.join(self._working_path,str(self.job.id),"images", "annotation_fix/"))
             print len(collection_fix)
             self._cytomine.dump_annotations \
                     (
                     annotations=collection_fix,
                     get_image_url_func=models.Annotation.get_annotation_crop_url,
-                    dest_path=os.path.join(self._working_path,str(self.job.id),"images", "annotation_fix/"),
+                    dest_path=os.path.join(self._working_path, str(self.job.id), "images", "annotation_fix/"),
                     desired_zoom=0
                 )
             print "dest path dump " + os.path.join(str(self.job.id), "images", "annotation_fix")
             annotation_moving = self._cytomine.get_annotation(long(self._id_annotation_moving))
             collection_moving = models.AnnotationCollection()
             collection_moving.data().append(annotation_moving)
-            #os.makedirs(os.path.join(self._working_path,str(self.job.id), "images", "annotation_moving/"))
+            # os.makedirs(os.path.join(self._working_path,str(self.job.id), "images", "annotation_moving/"))
             print len(collection_moving)
             self._cytomine.dump_annotations \
                     (
                     annotations=collection_moving,
                     get_image_url_func=models.Annotation.get_annotation_crop_url,
-                    dest_path=os.path.join(self._working_path,str(self.job.id),"images", "annotation_moving/"),
+                    dest_path=os.path.join(self._working_path, str(self.job.id), "images", "annotation_moving/"),
                     desired_zoom=0
                 )
-            print "dest path dump " + os.path.join(str(self.job.id),"images", "annotation_moving")
+            print "dest path dump " + os.path.join(str(self.job.id), "images", "annotation_moving")
             # get id_term for path #
             id_term = annotation_fix.term[0]
 
             # because the name of the file is vague, just list the file and get the elem at 0 #
-            list_fix = os.listdir(os.path.join(self._working_path,str(self.job.id), "images", "annotation_fix",str(id_term)))
-            list_moving = os.listdir(os.path.join(self._working_path,str(self.job.id), "images", "annotation_moving",str(id_term)))
+            list_fix = os.listdir(
+                os.path.join(self._working_path, str(self.job.id), "images", "annotation_fix", str(id_term)))
+            list_moving = os.listdir(
+                os.path.join(self._working_path, str(self.job.id), "images", "annotation_moving", str(id_term)))
 
             # format paths #
-            path_to_fix_image = os.path.join(self._working_path,str(self.job.id), "images", "annotation_fix",
+            path_to_fix_image = os.path.join(self._working_path, str(self.job.id), "images", "annotation_fix",
                                              str(id_term), str(list_fix[0]))
-            path_to_moving_image = os.path.join(self._working_path,str(self.job.id), "images", "annotation_moving",
+            path_to_moving_image = os.path.join(self._working_path, str(self.job.id), "images", "annotation_moving",
                                                 str(id_term), str(list_moving[0]))
 
             # debug #
@@ -148,7 +151,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
             print "path_to_moving_image : " + str(path_to_moving_image)
 
         # load images #
-        fix_image_grey = sitk.ReadImage(path_to_fix_image,sitk.sitkFloat32)
+        fix_image_grey = sitk.ReadImage(path_to_fix_image, sitk.sitkFloat32)
         moving_image_grey = sitk.ReadImage(path_to_moving_image, sitk.sitkFloat32)
 
         # open img color with CV #
@@ -203,13 +206,13 @@ class SimpleElastixJob(CytomineJob, Loggable):
                 "DefaultPixelValue": ("sitk_translation_default_pixel_value", False),  # int #
                 "Direction": ("sitk_translation_direction", True),  # tuple with 4 ints #
                 "FinalBSplineInterpolationOrder": ("sitk_translation_final_bspline_interpolation_order", False),
-            # int #
+                # int #
                 "FixedImageDimension": ("sitk_translation_fixed_image_dimension", False),  # int #
                 "FixedInternalImagePixelType": ("sitk_translation_fixed_internal_image_pixel_type", False),  # string #
                 "HowToCombineTransforms": ("sitk_translation_how_combine_transforms", False),  # string #
                 "Index": ("sitk_translation_index", True),  # tuple with 2 int #
                 "InitialTransformParametersFileName": (
-                "sitk_translation_initial_transform_parameters_file_name", False),
+                    "sitk_translation_initial_transform_parameters_file_name", False),
                 "MovingImageDimension": ("sitk_translation_moving_image_dimension", False),
                 "MovingInternalImagePixelType": ("sitk_translation_moving_internal_image_pixel_type", False),
                 "NumberOfParameters": ("sitk_translation_number_of_parameters", False),
@@ -257,6 +260,9 @@ class SimpleElastixJob(CytomineJob, Loggable):
         transform_x.SetMovingImage(itk_mov_image_color_2)
         img_to_save_2 = transform_x.Execute()
 
+        # print shape #
+        print "shape[0] = " + str(np_img.shape[0]) + " shape[1]" + str(np_img.shape[1])
+
         # format image color #
         img_color_final = np.zeros((np_img.shape[0], np_img.shape[1], 3))
 
@@ -265,10 +271,11 @@ class SimpleElastixJob(CytomineJob, Loggable):
         img_color_final[:, :, 2] = sitk.GetArrayFromImage(img_to_save_2)
 
         # save images #
-        img_transform_to_save_path = os.path.join(self._working_path, str(self.job.id), "images" , str(self._result_file_name))
+        img_transform_to_save_path = os.path.join(self._working_path, str(self.job.id), "images",
+                                                  str(self._result_file_name))
 
         if (self._overlayed_images == "true"):
-            img_overlay_to_save_path = os.path.join(self._working_path, str(self.job.id),"images",
+            img_overlay_to_save_path = os.path.join(self._working_path, str(self.job.id), "images",
                                                     "overlayed_images.png")
             cv2.imwrite(img_transform_to_save_path, img_color_final)
             cv2.imwrite(img_overlay_to_save_path, img_color_final + (0.80 * cv_fix_image))
@@ -291,6 +298,7 @@ class SimpleElastixJob(CytomineJob, Loggable):
         # remove the directory of the current job #
         shutil.rmtree(os.path.join(self._working_path, str(self.job.id)), ignore_errors=True)
         self.done(True)
+
 
 def main(argv):
     # parsing arguments #
@@ -357,4 +365,5 @@ def MakeUpProperties(dictionary, mode, properties_map, transform_x):
 # call main #
 if __name__ == "__main__":
     import sys
+
     main(sys.argv[1:])
