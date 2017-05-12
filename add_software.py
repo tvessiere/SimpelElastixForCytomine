@@ -10,9 +10,9 @@ if __name__ == "__main__":
 
     # Connect to cytomine, edit connection values
 
-    cytomine_host = "demo.cytomine.be"
-    Pk = 'cbfe0e04-3fd7-4a7f-a13c-b86685ecb570'
-    Prk = '1e1cb3e8-ed0a-434d-b049-3a48552429c7'
+    cytomine_host = "http://localhost-core:8080"
+    Pk = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    Prk = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
     id_project = 19941904
 
     # Connection to Cytomine Core
@@ -26,12 +26,12 @@ if __name__ == "__main__":
     )
 
     #add software with execute command
-    software = conn.add_software("SE_TranslationAffine10","createRabbitJobWithArgsService","download","python software_routeur/algo/simple_elastix/get_and_move.py "+
+    software = conn.add_software("Simple_Elastix","createRabbitJobWithArgsService","download","/root/miniconda2/envs/cytomine/bin/python software_routeur/algo/simple_elastix/get_and_move.py "+
                                                                                                      "--cytomine_host $cytomine_host " +
                                                                                                      "--cytomine_public_key $cytomine_public_key " +
                                                                                                      "--cytomine_private_key $cytomine_private_key " +
                                                                                                      "--cytomine_id_software $cytomine_id_software " +
-                                                                                                     "--cytomine_working_path software_routeur/algo/simple_elastix " +
+                                                                                                     "--cytomine_working_path software_router/algo/simple_elastix " +
                                                                                                      "--cytomine_id_project $cytomine_id_project " +
                                                                                                      "--fix_image_id fix_image " +
                                                                                                      "--mov_image_id $id_mov_image " +
@@ -41,7 +41,9 @@ if __name__ == "__main__":
                                                                                                      "--cytomine_annotation_fix_id $annotation_fix_id " +
                                                                                                      "--cytomine_annotation_moving_id $annotation_moving_id " +
                                                                                                      "--cytomine_upload demo-upload.cytomine.be " +
-                                                                                                     "--export_overlay_images $export_overlay_images "
+                                                                                                     "--export_overlay_images $export_overlay_images " +
+                                                                                                     "--number_of_resolutions $number_of_resolutions " +
+                                                                                                     "--result_file_name $result_file_name "
                                  )
 
 
@@ -57,3 +59,7 @@ if __name__ == "__main__":
     conn.add_software_parameter(name="cytomine_id_software",id_software=software.id,type= "Number",default_value= 0,required= True, index=100, set_by_server=True)
     conn.add_software_parameter(name="cytomine_id_project",id_software=software.id,type= "Number",default_value= 0,required= True, index=110, set_by_server=True)
     conn.add_software_parameter(name="export_overlay_images" , id_software= software.id, type="Boolean", default_value=False,required=True, index= 120, set_by_server=False)
+    conn.add_software_parameter(name="number_of_resolutions", id_software=software.id, type="Number",
+                                default_value=4, required=True, index=130, set_by_server=False)
+    conn.add_software_parameter(name="result_file_name", id_software=software.id, type="String",
+                                default_value="result_image", required=True, index=140, set_by_server=False)
